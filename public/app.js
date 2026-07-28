@@ -754,54 +754,233 @@ function printLedger(customerId) {
             <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
             <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: 'IBM Plex Mono', monospace; padding: 2rem; color: #1A1A1A; }
-                h1 { font-family: 'Special Elite', cursive; font-size: 1.5rem; margin-bottom: 0.5rem; color: #1A365D; }
-                h2 { font-family: 'Special Elite', cursive; font-size: 1.1rem; margin: 1.5rem 0 0.5rem; color: #1A365D; }
-                .info { font-size: 0.85rem; margin-bottom: 1rem; }
-                .info p { margin-bottom: 0.2rem; }
-                table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 0.5rem; }
-                th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid #ccc; }
-                th { background: #f0f0f0; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; }
-                .total { font-weight: 700; border-top: 2px solid #2D5A3D; }
-                .summary { margin-top: 1.5rem; padding: 1rem; border: 1px solid #ccc; border-radius: 8px; }
-                .summary p { margin-bottom: 0.3rem; font-size: 0.85rem; }
-                @media print { body { padding: 1rem; } }
+                body {
+                    font-family: 'IBM Plex Mono', monospace;
+                    padding: 2rem;
+                    color: #1A1A1A;
+                    background: #fff;
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+                .receipt-border {
+                    border: 3px double #1A365D;
+                    padding: 2rem 1.5rem;
+                    position: relative;
+                }
+                .receipt-border::before {
+                    content: '';
+                    position: absolute;
+                    top: 6px; left: 6px; right: 6px; bottom: 6px;
+                    border: 1px solid #1A365D;
+                    pointer-events: none;
+                }
+                .store-header {
+                    text-align: center;
+                    margin-bottom: 1.5rem;
+                    padding-bottom: 1rem;
+                    border-bottom: 2px dashed #2B6CB0;
+                }
+                .store-name {
+                    font-family: 'Special Elite', cursive;
+                    font-size: 1.8rem;
+                    color: #1A365D;
+                    letter-spacing: 3px;
+                    text-transform: uppercase;
+                    margin-bottom: 0.25rem;
+                }
+                .store-divider {
+                    font-family: 'Special Elite', cursive;
+                    color: #2B6CB0;
+                    font-size: 1.2rem;
+                    letter-spacing: 6px;
+                    margin-bottom: 0.25rem;
+                }
+                .store-tagline {
+                    font-size: 0.7rem;
+                    color: #4A8EC7;
+                    text-transform: uppercase;
+                    letter-spacing: 2px;
+                }
+                .receipt-title {
+                    font-family: 'Special Elite', cursive;
+                    font-size: 1.2rem;
+                    color: #1A365D;
+                    text-align: center;
+                    margin-bottom: 1rem;
+                    text-transform: uppercase;
+                    letter-spacing: 4px;
+                }
+                .receipt-info {
+                    font-size: 0.8rem;
+                    margin-bottom: 1.25rem;
+                    padding: 0.75rem 1rem;
+                    background: #F7FAFF;
+                    border-left: 4px solid #2B6CB0;
+                }
+                .receipt-info p { margin-bottom: 0.25rem; }
+                .receipt-info p:last-child { margin-bottom: 0; }
+                .receipt-info .label { color: #2B6CB0; }
+                .summary-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 0.4rem 1.5rem;
+                    margin-bottom: 1.25rem;
+                    padding: 0.75rem 1rem;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 4px;
+                    font-size: 0.8rem;
+                }
+                .summary-grid .label { color: #4A8EC7; }
+                .summary-grid .value { font-weight: 600; color: #1A365D; }
+                .summary-grid .full { grid-column: 1 / -1; }
+                .summary-grid .balance-row {
+                    grid-column: 1 / -1;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding-top: 0.4rem;
+                    margin-top: 0.4rem;
+                    border-top: 2px solid #1A365D;
+                    font-size: 1rem;
+                    font-weight: 700;
+                    color: #1A365D;
+                }
+                .print-date {
+                    text-align: center;
+                    font-size: 0.65rem;
+                    color: #999;
+                    margin-bottom: 0.75rem;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 0.78rem;
+                    margin-top: 0.25rem;
+                }
+                thead th {
+                    background: #1A365D;
+                    color: #fff;
+                    padding: 0.55rem 0.5rem;
+                    text-align: left;
+                    text-transform: uppercase;
+                    font-size: 0.65rem;
+                    letter-spacing: 1px;
+                    font-weight: 600;
+                }
+                thead th:first-child { border-radius: 4px 0 0 0; }
+                thead th:last-child { border-radius: 0 4px 0 0; }
+                tbody td {
+                    padding: 0.5rem;
+                    border-bottom: 1px solid #E2E8F0;
+                }
+                tbody tr:nth-child(even) { background: #F7FAFF; }
+                tbody tr:hover { background: #EDF2F7; }
+                tbody tr.total td {
+                    background: #EDF2F7;
+                    border-top: 2px solid #1A365D;
+                    font-weight: 700;
+                    color: #1A365D;
+                }
+                .status-badge {
+                    display: inline-block;
+                    padding: 0.15rem 0.6rem;
+                    border-radius: 3px;
+                    font-size: 0.7rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+                .status-ACTIVE { background: #EBF8FF; color: #2B6CB0; }
+                .status-PAID { background: #F0FFF4; color: #276749; }
+                .status-OVERDUE { background: #FFF5F5; color: #C53030; }
+                .footer-brand {
+                    text-align: center;
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 2px dashed #2B6CB0;
+                    font-family: 'Special Elite', cursive;
+                    font-size: 0.75rem;
+                    color: #4A8EC7;
+                }
+                @media print {
+                    body { padding: 0.5rem; }
+                    .receipt-border { border-color: #1A365D; }
+                    thead th { background: #1A365D !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    tbody tr:nth-child(even) { background: #F7FAFF !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    tbody tr.total td { background: #EDF2F7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    .status-ACTIVE { background: #EBF8FF !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    .status-PAID { background: #F0FFF4 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    .status-OVERDUE { background: #FFF5F5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    .receipt-info { background: #F7FAFF !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                }
+                @page { margin: 0.5in; }
             </style>
         </head>
         <body>
-            <h1>Installment Ledger</h1>
-            <div class="info">
-                <p><strong>Customer:</strong> ${escapeHtml(customer.name)}</p>
-                <p><strong>Address:</strong> ${escapeHtml(customer.address) || '—'}</p>
-                <p><strong>Item:</strong> ${escapeHtml(customer.brand)} ${escapeHtml(customer.model)}</p>
-                <p><strong>Serial #:</strong> ${escapeHtml(customer.serial_number) || '—'}</p>
-                <p><strong>Purchase Date:</strong> ${formatDate(customer.purchase_date)}</p>
+            <div class="receipt-border">
+                <div class="store-header">
+                    <div class="store-name">JEZZ APPLIANCES</div>
+                    <div class="store-divider">✦ ✦ ✦ ✦ ✦</div>
+                    <div class="store-tagline">Official Installment Ledger</div>
+                </div>
+
+                <div class="receipt-title">Customer Ledger</div>
+
+                <div class="receipt-info">
+                    <p><span class="label">Customer:</span> ${escapeHtml(customer.name)}</p>
+                    <p><span class="label">Address:</span> ${escapeHtml(customer.address) || '—'}</p>
+                    <p><span class="label">Item:</span> ${escapeHtml(customer.brand)} ${escapeHtml(customer.model)}</p>
+                    <p><span class="label">Serial #:</span> ${escapeHtml(customer.serial_number) || '—'}</p>
+                    <p><span class="label">Purchase Date:</span> ${formatDate(customer.purchase_date)}</p>
+                </div>
+
+                <div class="summary-grid">
+                    <div><span class="label">SRP</span><br><span class="value">${formatCurrency(customer.srp)}</span></div>
+                    <div><span class="label">Down Payment</span><br><span class="value">${formatCurrency(customer.downpayment)}</span></div>
+                    <div><span class="label">Terms</span><br><span class="value">${customer.terms} month${customer.terms !== 1 ? 's' : ''}</span></div>
+                    <div><span class="label">Monthly</span><br><span class="value">${formatCurrency(customer.monthly_installment)}</span></div>
+                    <div class="balance-row">
+                        <span>BALANCE</span>
+                        <span>${formatCurrency(customer.balance)}</span>
+                    </div>
+                    <div class="full" style="text-align:center;margin-top:0.25rem;">
+                        <span class="status-badge status-${customer.status}">${customer.status}</span>
+                    </div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:1rem;">
+                    <div style="font-family:'Special Elite',cursive;font-size:0.95rem;color:#1A365D;">Payment History</div>
+                    <div class="print-date">Printed ${new Date().toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'numeric' })}</div>
+                </div>
+
+                <div id="payments-table" style="margin-top:0.25rem;">
+                    <table>
+                        <thead><tr><th>#</th><th>Date</th><th>Amount</th><th>Rebate</th><th>Net</th></tr></thead>
+                        <tbody><tr><td colspan="5" style="text-align:center;padding:1rem;color:#999;">Loading payments...</td></tr></tbody>
+                    </table>
+                </div>
+
+                <div class="footer-brand">Created by ChandeM.</div>
             </div>
-            <div class="summary">
-                <p><strong>SRP:</strong> ${formatCurrency(customer.srp)}</p>
-                <p><strong>Down Payment:</strong> ${formatCurrency(customer.downpayment)}</p>
-                <p><strong>Terms:</strong> ${customer.terms} months</p>
-                <p><strong>Monthly Installment:</strong> ${formatCurrency(customer.monthly_installment)}</p>
-                <p><strong>Balance:</strong> ${formatCurrency(customer.balance)}</p>
-                <p><strong>Status:</strong> ${customer.status}</p>
-            </div>
-            <h2>Payment History</h2>
-            <p style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">Printed on ${new Date().toLocaleDateString()}</p>
-            <div id="payments-table">Loading...</div>
+
             <script>
                 fetch('/api/payments/${customer.id}')
                     .then(r => r.json())
                     .then(payments => {
                         const totalPaid = payments.reduce((s, p) => s + p.amount, 0);
                         const totalRebate = payments.reduce((s, p) => s + (p.rebate || 0), 0);
-                        let html = '<table><thead><tr><th>Date</th><th>Amount</th><th>Rebate</th><th>Net</th></tr></thead><tbody>';
-                        payments.forEach(p => {
-                            html += '<tr><td>' + new Date(p.payment_date).toLocaleDateString() + '</td>';
-                            html += '<td>₱' + p.amount.toLocaleString(undefined, {minimumFractionDigits:2}) + '</td>';
+                        let html = '<table><thead><tr><th>#</th><th>Date</th><th>Amount</th><th>Rebate</th><th>Net</th></tr></thead><tbody>';
+                        payments.forEach((p, i) => {
+                            html += '<tr>';
+                            html += '<td style="color:#999;font-size:0.7rem;">' + (i + 1) + '</td>';
+                            html += '<td>' + new Date(p.payment_date).toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' }) + '</td>';
+                            html += '<td>' + '₱' + p.amount.toLocaleString(undefined, {minimumFractionDigits:2}) + '</td>';
                             html += '<td>' + (p.rebate > 0 ? '₱' + p.rebate.toLocaleString(undefined, {minimumFractionDigits:2}) : '—') + '</td>';
-                            html += '<td>₱' + (p.amount - (p.rebate||0)).toLocaleString(undefined, {minimumFractionDigits:2}) + '</td></tr>';
+                            html += '<td>' + '₱' + (p.amount - (p.rebate||0)).toLocaleString(undefined, {minimumFractionDigits:2}) + '</td>';
+                            html += '</tr>';
                         });
-                        html += '<tr class="total"><td><strong>Total Paid</strong></td><td><strong>₱' + totalPaid.toLocaleString(undefined, {minimumFractionDigits:2}) + '</strong></td>';
+                        html += '<tr class="total"><td colspan="2"><strong>Total Paid</strong></td>';
+                        html += '<td><strong>₱' + totalPaid.toLocaleString(undefined, {minimumFractionDigits:2}) + '</strong></td>';
                         html += '<td>' + (totalRebate > 0 ? '₱' + totalRebate.toLocaleString(undefined, {minimumFractionDigits:2}) : '—') + '</td>';
                         html += '<td><strong>₱' + (totalPaid - totalRebate).toLocaleString(undefined, {minimumFractionDigits:2}) + '</strong></td></tr>';
                         html += '</tbody></table>';

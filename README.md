@@ -1,4 +1,4 @@
-# Installment Tracker — Appliance Store
+# Installment Tracker — JEZZ APPLIANCES
 
 Offline installment tracking system for appliance stores. Built with Node.js, Express, SQLite3, and vanilla HTML/CSS/JS.
 

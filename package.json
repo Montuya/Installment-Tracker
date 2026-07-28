@@ -1,7 +1,7 @@
 {
   "name": "installment-tracker",
   "version": "1.0.0",
-  "description": "Offline Installment Tracking System for Appliance Store",
+  "description": "Offline Installment Tracking System for JEZZ APPLIANCES",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
