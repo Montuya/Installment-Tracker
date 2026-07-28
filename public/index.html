@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installment Tracker — Appliance Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="spinner-overlay hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">Installment Tracker</h1>
+            <p class="subtitle">Appliance Store Ledger</p>
+        </div>
+        <div class="header-actions">
+            <button onclick="exportData()" class="btn btn-secondary" title="Export Data">Export</button>
+            <button onclick="importData()" class="btn btn-secondary" title="Import Data">Import</button>
+            <input type="file" id="import-file" accept=".json" style="display: none;" onchange="handleImport(event)">
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Dashboard -->
+        <section class="dashboard" id="dashboard">
+            <div class="stat-card">
+                <span class="stat-label">Total Customers</span>
+                <span class="stat-value" id="stat-total">0</span>
+            </div>
+            <div class="stat-card stat-cash">
+                <span class="stat-label">Cash Customers</span>
+                <span class="stat-value" id="stat-cash">0</span>
+            </div>
+            <div class="stat-card stat-installment">
+                <span class="stat-label">Installment Customers</span>
+                <span class="stat-value" id="stat-installment">0</span>
+            </div>
+            <div class="stat-card stat-balance">
+                <span class="stat-label">Outstanding Balance</span>
+                <span class="stat-value" id="stat-balance">₱0.00</span>
+            </div>
+            <div class="stat-card stat-due">
+                <span class="stat-label">Due Within 7 Days</span>
+                <span class="stat-value" id="stat-due">0</span>
+            </div>
+            <div class="stat-card stat-overdue">
+                <span class="stat-label">Overdue</span>
+                <span class="stat-value" id="stat-overdue">0</span>
+            </div>
+        </section>
+
+        <!-- Controls -->
+        <section class="controls">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search by name, brand, or model..." oninput="searchCustomers()">
+            </div>
+            <div class="sort-box">
+                <select id="sort-select" onchange="sortCustomers()">
+                    <option value="newest">Newest Customer</option>
+                    <option value="name">By Name</option>
+                    <option value="balance-desc">Highest Balance</option>
+                    <option value="balance-asc">Lowest Balance</option>
+                    <option value="due-date">Nearest Due Date</option>
+                </select>
+            </div>
+            <button onclick="openAddCustomerModal()" class="btn btn-primary">+ Add Customer</button>
+        </section>
+
+        <!-- Customer List -->
+        <section class="customer-list" id="customer-list">
+            <!-- Customers will be rendered here -->
+        </section>
+    </main>
+
+    <!-- Modal -->
+    <div id="modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeModal()"></div>
+        <div class="modal-content" id="modal-content">
+            <!-- Modal content injected by JS -->
+        </div>
+    </div>
+
+    <!-- Confirm Dialog -->
+    <div id="confirm-dialog" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeConfirm()"></div>
+        <div class="modal-content confirm-modal">
+            <h3 id="confirm-title">Confirm</h3>
+            <p id="confirm-message">Are you sure?</p>
+            <div class="modal-actions">
+                <button onclick="closeConfirm()" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-btn" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        Created with <span class="footer-heart">&hearts;</span> by <span class="footer-brand">ChandeM.</span> &mdash; Installment Tracker v1.0
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
