@@ -9,6 +9,16 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Static files with cache busting
+app.get('/app.js', (req, res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(__dirname, 'public', 'app.js'));
+});
+app.get('/style.css', (req, res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(__dirname, 'public', 'style.css'));
+});
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Initialize database

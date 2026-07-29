@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDatabase } = require('../database/database');
+const { computeMonthsBehind } = require('./monthsBehind');
 
 // GET /api/customers - List all customers
 router.get('/', (req, res) => {
@@ -34,6 +35,14 @@ router.get('/:id', (req, res) => {
     }
 });
 
+function addMonth(dateStr) {
+    const d = new Date(dateStr + 'T12:00:00');
+    const day = d.getDate();
+    d.setMonth(d.getMonth() + 1);
+    if (d.getDate() !== day) d.setDate(0);
+    return d.toISOString().split('T')[0];
+}
+
 // POST /api/customers - Create customer
 router.post('/', (req, res) => {
     try {
@@ -51,20 +60,25 @@ router.post('/', (req, res) => {
         const totalAmount = srp || 0;
         const balance = totalAmount - (downpayment || 0);
         const monthlyInstallment = terms > 0 ? balance / terms : 0;
-        const nextDueDate = purchase_date || new Date().toISOString().split('T')[0];
+        const baseDate = purchase_date || new Date().toISOString().split('T')[0];
+        const nextDueDate = terms > 0 ? addMonth(baseDate) : baseDate;
+
+        const monthsBehind = balance > 0 && terms > 0
+            ? computeMonthsBehind(baseDate, monthlyInstallment, totalAmount - balance - (downpayment || 0), terms)
+            : 0;
 
         const result = db.prepare(`
             INSERT INTO customers (
                 name, address, brand, model, serial_number,
                 purchase_date, srp, downpayment, terms,
                 monthly_installment, total_amount, balance,
-                next_due_date, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                next_due_date, status, months_behind
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
             name, address || '', brand || '', model || '', serial_number || '',
             purchase_date || '', totalAmount, downpayment || 0, terms || 0,
             monthlyInstallment, totalAmount, balance,
-            nextDueDate, balance > 0 ? 'ACTIVE' : 'PAID'
+            nextDueDate, balance > 0 ? 'ACTIVE' : 'PAID', monthsBehind
         );
 
         const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(result.lastInsertRowid);
@@ -102,11 +116,21 @@ router.put('/:id', (req, res) => {
         else if (existing.next_due_date < new Date().toISOString().split('T')[0]) status = 'OVERDUE';
         else status = 'ACTIVE';
 
+        const newDueDate = newTerms > 0 && purchase_date
+            ? addMonth(purchase_date)
+            : existing.next_due_date;
+
+        const effectivePurchaseDate = purchase_date !== undefined ? purchase_date : existing.purchase_date;
+        const monthsBehind = newTerms > 0
+            ? computeMonthsBehind(effectivePurchaseDate, monthlyInstallment, totalPaid, newTerms)
+            : 0;
+
         db.prepare(`
             UPDATE customers SET
                 name = ?, address = ?, brand = ?, model = ?, serial_number = ?,
                 purchase_date = ?, srp = ?, downpayment = ?, terms = ?,
-                monthly_installment = ?, total_amount = ?, balance = ?, status = ?
+                monthly_installment = ?, total_amount = ?, balance = ?,
+                next_due_date = ?, status = ?, months_behind = ?
             WHERE id = ?
         `).run(
             name || existing.name,
@@ -116,7 +140,8 @@ router.put('/:id', (req, res) => {
             serial_number !== undefined ? serial_number : existing.serial_number,
             purchase_date !== undefined ? purchase_date : existing.purchase_date,
             totalAmount, dp, newTerms,
-            monthlyInstallment, totalAmount, Math.max(0, newBalance), status,
+            monthlyInstallment, totalAmount, Math.max(0, newBalance),
+            newDueDate, status, monthsBehind,
             req.params.id
         );
 

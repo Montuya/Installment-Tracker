@@ -25,14 +25,22 @@
             <p class="subtitle">JEZZ APPLIANCES Ledger</p>
         </div>
         <div class="header-actions">
-            <button onclick="exportData()" class="btn btn-secondary" title="Export Data">Export</button>
+            <button onclick="exportCSV()" class="btn btn-secondary" title="Export CSV">CSV</button>
+            <button onclick="exportData()" class="btn btn-secondary" title="Export JSON Backup">Export</button>
             <button onclick="importData()" class="btn btn-secondary" title="Import Data">Import</button>
+            <button onclick="printAll()" class="btn btn-gold" title="Print All Customers">Print All</button>
             <input type="file" id="import-file" accept=".json" style="display: none;" onchange="handleImport(event)">
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="container">
+        <!-- Chart -->
+        <section class="chart-section" id="chart-section">
+            <div class="chart-title">Monthly Collections</div>
+            <div class="chart-bars" id="chart-bars"></div>
+        </section>
+
         <!-- Dashboard -->
         <section class="dashboard" id="dashboard">
             <div class="stat-card">
@@ -67,6 +75,11 @@
                 <input type="text" id="search-input" placeholder="Search by name, brand, or model..." oninput="searchCustomers()">
             </div>
             <div class="sort-box">
+                <select id="month-filter" onchange="renderCustomers()">
+                    <option value="">All Months</option>
+                </select>
+            </div>
+            <div class="sort-box">
                 <select id="sort-select" onchange="sortCustomers()">
                     <option value="newest">Newest Customer</option>
                     <option value="name">By Name</option>
@@ -76,6 +89,11 @@
                 </select>
             </div>
             <button onclick="openAddCustomerModal()" class="btn btn-primary">+ Add Customer</button>
+        </section>
+        <section class="bulk-bar" id="bulk-bar">
+            <span id="bulk-count">0 selected</span>
+            <button onclick="deleteSelected()" class="btn btn-danger btn-small">Delete Selected</button>
+            <button onclick="clearSelection()" class="btn btn-secondary btn-small">Clear</button>
         </section>
 
         <!-- Customer List -->
@@ -110,6 +128,6 @@
         Created with <span class="footer-heart">&hearts;</span> by <span class="footer-brand">ChandeM.</span> &mdash; Installment Tracker v1.0
     </footer>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=4.2"></script>
 </body>
 </html>

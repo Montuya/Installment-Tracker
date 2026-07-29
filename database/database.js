@@ -24,6 +24,27 @@ function getDatabase() {
     // Create tables from schema
     db.exec(schema);
 
+    // Migrate: add months_behind if not present (existing DBs)
+    try {
+        db.prepare('SELECT months_behind FROM customers LIMIT 1').get();
+    } catch {
+        db.prepare('ALTER TABLE customers ADD COLUMN months_behind INTEGER DEFAULT 0').run();
+    }
+
+    // Migrate: add type column to payments if not present
+    try {
+        db.prepare('SELECT type FROM payments LIMIT 1').get();
+    } catch {
+        db.prepare('ALTER TABLE payments ADD COLUMN type TEXT DEFAULT "payment"').run();
+    }
+
+    // Migrate: add notes column to payments if not present
+    try {
+        db.prepare('SELECT notes FROM payments LIMIT 1').get();
+    } catch {
+        db.prepare('ALTER TABLE payments ADD COLUMN notes TEXT DEFAULT ""').run();
+    }
+
     // Run integrity check on startup
     const result = db.pragma('integrity_check');
     if (result[0].integrity_check !== 'ok') {

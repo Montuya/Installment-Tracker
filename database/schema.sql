@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS customers (
     balance REAL DEFAULT 0,
     next_due_date TEXT DEFAULT '',
     status TEXT DEFAULT 'ACTIVE',
+    months_behind INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now', 'localtime'))
 );
 
@@ -26,6 +27,8 @@ CREATE TABLE IF NOT EXISTS payments (
     payment_date TEXT NOT NULL,
     amount REAL NOT NULL,
     rebate REAL DEFAULT 0,
+    type TEXT DEFAULT 'payment',
+    notes TEXT DEFAULT '',
     created_at TEXT DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
 );
